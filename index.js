@@ -41,10 +41,21 @@ class MHZ19B extends EventEmitter {
                 }
                 return;
             }
-            const co2 = (reading[2] * 256) + reading[3];
-            this.emit('data', {co2});
+		const dataFromSensor = {
+			co2: (reading[2] * 256) + reading[3],
+			hh: parseInt(reading[2]),
+			ll: parseInt(reading[3]),
+			temperature: parseInt(reading[4]) - 40,
+			tt: parseInt(reading[4]),
+			ss: parseInt(reading[5]),
+			uh: parseInt(reading[6]),
+			ui: parseInt(reading[7]),
+			uhul: (reading[6]*256) + reading[7]
+		};
+
+            this.emit('data', dataFromSensor); 
             if (this.resolve) {
-                this.resolve(co2);
+                this.resolve(dataFromSensor);
                 this.resolve = null;
                 return;
             }
