@@ -1,4 +1,4 @@
-const SerialPort   = require('serialport');
+const { SerialPort } = require('serialport');
 const EventEmitter = require('events');
 
 const BYTES_readCO2        = [0xFF, 0x01, 0x86, 0x00, 0x00, 0x00, 0x00, 0x00];
@@ -9,7 +9,7 @@ const BYTES_ABCOff         = [0xFF, 0x01, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00];
 class MHZ19B extends EventEmitter {
     constructor(port = '/dev/serial0') {
         super();
-        this.serialPort = new SerialPort(port, { baudRate: 9600 });
+        this.serialPort = new SerialPort({path: port, baudRate: 9600 });
 
         this.buffer = [];
     
@@ -20,7 +20,11 @@ class MHZ19B extends EventEmitter {
             console.log('MH-Z19B port closed');
             this.close();
         });
-        
+
+        this.serialPort.on('open', () => {
+            console.log('MH-Z19B port is opened');
+        });
+
         this.serialPort.on('error', (err) => {
             console.log('MH-Z19B error', err);
             this.close();
@@ -41,19 +45,20 @@ class MHZ19B extends EventEmitter {
                 }
                 return;
             }
-		const dataFromSensor = {
-			co2: (reading[2] * 256) + reading[3],
-			hh: parseInt(reading[2]),
-			ll: parseInt(reading[3]),
-			temperature: parseInt(reading[4]) - 40,
-			tt: parseInt(reading[4]),
-			ss: parseInt(reading[5]),
-			uh: parseInt(reading[6]),
-			ui: parseInt(reading[7]),
-			uhul: (reading[6]*256) + reading[7]
-		};
 
-            this.emit('data', dataFromSensor); 
+            const dataFromSensor = {
+              co2: (reading[2] * 256) + reading[3],
+              hh: parseInt(reading[2]),
+              ll: parseInt(reading[3]),
+              temperature: parseInt(reading[4]) - 40,
+              tt: parseInt(reading[4]),
+              ss: parseInt(reading[5]),
+              uh: parseInt(reading[6]),
+              ui: parseInt(reading[7]),
+              uhul: (reading[6]*256) + reading[7]
+            };
+
+            this.emit('data', dataFromSensor);
             if (this.resolve) {
                 this.resolve(dataFromSensor);
                 this.resolve = null;
