@@ -1,6 +1,6 @@
 {
   "name": "mh-z19b",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Communicate with the MH-Z19B IR CO2 sensor",
   "main": "index.js",
   "scripts": {

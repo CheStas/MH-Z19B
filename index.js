@@ -12,21 +12,39 @@ class MHZ19B extends EventEmitter {
         this.serialPort = new SerialPort({path: port, baudRate: 9600 });
 
         this.buffer = [];
-    
+
+        this.ready = false;
         this.resolve;
         this.reject;
 
+        this.isReady = new Promise((resolve, reject) => {
+          let intervalCounter = 0;
+          const intervalId = setInterval(() => {
+            intervalCounter += 1;
+            if (this.ready) {
+              clearInterval(intervalId);
+              resolve(true);
+            } else if (intervalCounter > 20) {
+              clearInterval(intervalId);
+              reject('MH-Z19B port is not ready after 10sec');
+            }
+          }, 500)
+        });
+
         this.serialPort.on('close', () => {
             console.log('MH-Z19B port closed');
+            this.ready = false;
             this.close();
         });
 
         this.serialPort.on('open', () => {
             console.log('MH-Z19B port is opened');
+            this.ready = true;
         });
 
         this.serialPort.on('error', (err) => {
             console.log('MH-Z19B error', err);
+            this.ready = false;
             this.close();
         });
 
