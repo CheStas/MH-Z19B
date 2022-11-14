@@ -17,7 +17,7 @@ class MHZ19B extends EventEmitter {
         this.resolve;
         this.reject;
 
-        this.isReady = new Promise((resolve, reject) => {
+        this.isReady = () => new Promise((resolve, reject) => {
           let intervalCounter = 0;
           const intervalId = setInterval(() => {
             intervalCounter += 1;
